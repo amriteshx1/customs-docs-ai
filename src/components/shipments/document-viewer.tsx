@@ -59,36 +59,40 @@ export function DocumentViewer({
 
   if (!document) {
     return (
-      <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-line bg-paper p-8 text-center text-sm text-muted">
-        Upload a document to preview it beside the extracted fields.
+      <div className="flex h-full min-h-0 items-center justify-center rounded-lg border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        Select a document to preview it beside the extracted fields.
       </div>
     );
   }
 
   return (
-    <div className="flex h-full min-h-[420px] flex-col rounded-lg border border-line bg-paper">
-      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-card">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-2.5">
         <p className="truncate text-sm">{document.originalFileName}</p>
         {document.mimeType === "application/pdf" ? (
           <div className="flex items-center gap-2">
-            <Button variant="quiet" type="button" disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
+            <Button variant="outline" size="sm" type="button" disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
               Previous
             </Button>
-            <span className="text-xs text-muted">
+            <span className="text-xs tabular-nums text-muted-foreground">
               {page} / {pages}
             </span>
-            <Button variant="quiet" type="button" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>
+            <Button variant="outline" size="sm" type="button" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>
               Next
             </Button>
           </div>
         ) : null}
       </div>
-      <div className="min-h-0 flex-1 overflow-auto bg-[#f7f9fb] p-4">
-        {loading ? <p className="mb-3 text-sm text-muted">Loading the document.</p> : null}
+      <div className="relative min-h-0 flex-1 overflow-auto bg-zinc-950 p-4">
+        {loading ? (
+          <p className="absolute inset-0 z-10 flex items-center justify-center text-sm text-muted-foreground">
+            Loading the document.
+          </p>
+        ) : null}
         {error ? (
           <div className="space-y-3 text-sm">
             <p>{error}</p>
-            <a className="text-accent underline" href={url} target="_blank" rel="noreferrer">
+            <a className="text-info underline" href={url} target="_blank" rel="noreferrer">
               Open the file
             </a>
           </div>
