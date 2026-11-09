@@ -95,8 +95,13 @@ export function ShipmentWorkspace({ initial, role }: { initial: ShipmentDetail; 
     return () => window.clearInterval(timer);
   }, [detail.id, detail.processingStatus]);
 
+  const extracting = running || detail.processingStatus === "PROCESSING";
   const activeDocument = detail.documents.find((document) => document.documentType === activeType) ?? null;
   const activeFields = detail.fields.filter((field) => field.documentType === activeType);
+  const readingDocument = detail.documents.find((document) => document.extractionStatus === "PROCESSING") ?? null;
+  const extractedCount = detail.documents.filter(
+    (document) => document.extractionStatus !== "PENDING" && document.extractionStatus !== "PROCESSING",
+  ).length;
   const highlighted = useMemo(() => {
     const keys = new Set<string>();
     for (const issue of detail.issues) {
@@ -169,14 +174,6 @@ export function ShipmentWorkspace({ initial, role }: { initial: ShipmentDetail; 
           <Button type="button" disabled={!detail.eligibility.eligible || exporting} onClick={downloadCsv}>
             {exporting ? "Preparing CSV" : "Download CSV"}
           </Button>
-          {!detail.eligibility.eligible ? (
-            <ul className="max-w-xs space-y-1 text-right text-xs text-muted-foreground">
-              {detail.eligibility.reasons.slice(0, 4).map((reason) => (
-                <li key={reason}>{reason}</li>
-              ))}
-              {detail.eligibility.reasons.length > 4 ? <li>More reasons are listed under Checks.</li> : null}
-            </ul>
-          ) : null}
         </div>
       </div>
 
@@ -197,15 +194,20 @@ export function ShipmentWorkspace({ initial, role }: { initial: ShipmentDetail; 
             type="button"
             variant="outline"
             size="sm"
-            disabled={running || detail.documents.length < 3 || detail.processingStatus === "PROCESSING"}
+            disabled={extracting || detail.documents.length < 3}
             onClick={runExtraction}
           >
-            {detail.processingStatus === "PROCESSING" ? "Reading documents" : detail.processingStatus === "FAILED" ? "Retry extraction" : "Run extraction"}
+            {extracting ? "Extracting" : detail.processingStatus === "FAILED" ? "Retry extraction" : "Run extraction"}
           </Button>
         ) : null}
         {detail.documents.length < 3 ? <p className="text-sm text-muted-foreground">Upload all three documents before extraction.</p> : null}
-        {detail.processingStatus === "PROCESSING" ? (
-          <p className="text-sm text-muted-foreground">Reading the documents. You can leave this page and come back.</p>
+        {extracting ? (
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            {readingDocument
+              ? `Reading ${DOCUMENT_LABEL[readingDocument.documentType]} (${extractedCount} of ${detail.documents.length} done).`
+              : "Starting extraction."}{" "}
+            You can leave this page and come back.
+          </p>
         ) : null}
       </div>
 
