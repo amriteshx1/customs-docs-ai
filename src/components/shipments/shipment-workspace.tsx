@@ -147,7 +147,7 @@ export function ShipmentWorkspace({ initial, role }: { initial: ShipmentDetail; 
   }
 
   return (
-    <div className="absolute inset-0 flex flex-col overflow-hidden px-6 py-3">
+    <div className="flex min-h-full flex-col overflow-x-hidden px-6 py-3">
       <div className="mb-3 flex shrink-0 items-start justify-between gap-6">
         <div className="min-w-0">
           <h1 className="text-xl font-semibold tracking-tight tabular-nums">{detail.shipmentCode}</h1>
@@ -209,8 +209,8 @@ export function ShipmentWorkspace({ initial, role }: { initial: ShipmentDetail; 
         ) : null}
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(380px,46%)_minmax(0,1fr)] gap-4">
-        <Tabs value={tab} onValueChange={setTab} className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-card">
+      <div className="grid min-h-[70dvh] w-full min-w-0 flex-1 grid-cols-1 grid-rows-[repeat(2,minmax(50dvh,auto))] items-stretch gap-4 overflow-x-hidden lg:grid-cols-[minmax(0,46%)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]">
+        <Tabs value={tab} onValueChange={setTab} className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card">
           <TabsList className="w-full shrink-0 justify-start">
             <TabsTrigger value="fields">Fields</TabsTrigger>
             <TabsTrigger value="checks">Checks</TabsTrigger>
@@ -244,7 +244,7 @@ export function ShipmentWorkspace({ initial, role }: { initial: ShipmentDetail; 
             <ActivityList detail={detail} />
           </TabsContent>
         </Tabs>
-        <div className="h-full min-h-0">
+        <div className="h-full min-h-0 min-w-0">
           <DocumentViewer key={activeDocument?.id ?? "empty"} shipmentId={detail.id} document={activeDocument} />
         </div>
       </div>
