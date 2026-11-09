@@ -1,11 +1,12 @@
-import * as React from "react";
+import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-export function Input({ className, ...props }: React.ComponentProps<"input">) {
+export function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <input
+      type={type}
       className={cn(
-        "h-10 w-full rounded-md border border-line bg-paper px-3 text-sm text-ink placeholder:text-muted",
+        "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-none transition-colors placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
       {...props}
@@ -17,7 +18,7 @@ export function TextArea({ className, ...props }: React.ComponentProps<"textarea
   return (
     <textarea
       className={cn(
-        "min-h-20 w-full rounded-md border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-muted",
+        "flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
       {...props}
