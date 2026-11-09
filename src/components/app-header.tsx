@@ -1,40 +1,57 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ROLE_LABEL } from "@/domain/labels";
 import type { AppRole } from "@/domain/types";
 import { signOut } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 export function AppHeader({ user }: { user: { name: string; role: AppRole } }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   return (
-    <header className="border-b border-line bg-paper">
-      <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-6 px-6">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="font-serif text-xl text-ink">
-            Customs desk
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+      <div className="flex h-14 items-center justify-between gap-6 px-6">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="text-sm font-semibold tracking-tight text-foreground">
+            Customs Desk
           </Link>
-          <nav className="flex items-center gap-5 text-sm">
-            <Link href="/" className="text-ink">
+          <Separator orientation="vertical" className="h-4" />
+          <nav className="flex items-center gap-1 text-sm">
+            <Link
+              href="/"
+              className={cn(
+                "rounded-md px-2.5 py-1.5 text-muted-foreground hover:text-foreground",
+                pathname === "/" || pathname.startsWith("/shipments") ? "text-foreground" : "",
+              )}
+            >
               Shipments
             </Link>
             {user.role === "DOCUMENTATION_MANAGER" ? (
-              <Link href="/accuracy" className="text-ink">
+              <Link
+                href="/accuracy"
+                className={cn(
+                  "rounded-md px-2.5 py-1.5 text-muted-foreground hover:text-foreground",
+                  pathname.startsWith("/accuracy") ? "text-foreground" : "",
+                )}
+              >
                 Accuracy
               </Link>
             ) : null}
           </nav>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="text-right">
-            <div className="text-sm font-medium">{user.name}</div>
-            <div className="text-xs text-muted">{ROLE_LABEL[user.role]}</div>
+            <div className="text-sm font-medium leading-none">{user.name}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{ROLE_LABEL[user.role]}</div>
           </div>
           <Button
-            variant="quiet"
+            variant="outline"
+            size="sm"
             type="button"
             onClick={async () => {
               await signOut();
