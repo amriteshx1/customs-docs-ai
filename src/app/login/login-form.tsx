@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { signIn } from "@/lib/auth-client";
 
 export function LoginForm() {
@@ -13,7 +14,7 @@ export function LoginForm() {
 
   return (
     <form
-      className="mt-6 space-y-4"
+      className="space-y-4"
       onSubmit={async (event) => {
         event.preventDefault();
         setPending(true);
@@ -32,16 +33,16 @@ export function LoginForm() {
         router.refresh();
       }}
     >
-      <label className="block space-y-1 text-sm">
-        <span>Email</span>
-        <Input name="email" type="email" required autoComplete="username" />
-      </label>
-      <label className="block space-y-1 text-sm">
-        <span>Password</span>
-        <Input name="password" type="password" required autoComplete="current-password" />
-      </label>
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" name="email" type="email" required autoComplete="username" />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="password">Password</Label>
+        <Input id="password" name="password" type="password" required autoComplete="current-password" />
+      </div>
       {error ? <p className="text-sm text-bad">{error}</p> : null}
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Signing in" : "Sign in"}
       </Button>
     </form>
