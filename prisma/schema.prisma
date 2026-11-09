@@ -1,0 +1,312 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String     @id
+  name          String
+  email         String
+  emailVerified Boolean    @default(false)
+  image         String?
+  role          String     @default("DOCUMENTATION_EXECUTIVE")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  shipments     Shipment[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Shipment {
+  id                 String           @id @default(cuid())
+  shipmentCode       String           @unique
+  supplierName       String
+  supplierCountry    String
+  importerName       String?
+  contentRevision    Int              @default(1)
+  submittedRevision  Int?
+  processingStatus   ProcessingStatus @default(AWAITING_DOCUMENTS)
+  reviewStatus       ReviewStatus     @default(NOT_READY)
+  createdById        String
+  createdBy          User             @relation(fields: [createdById], references: [id])
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  documents          Document[]
+  fields             ExtractedField[]
+  issues             ValidationIssue[]
+  approval           Approval?
+  exports            ExportRecord[]
+  events             ActivityEvent[]
+
+  @@index([createdAt])
+}
+
+model Document {
+  id                String            @id @default(cuid())
+  shipmentId        String
+  shipment          Shipment          @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  documentType      DocumentType
+  originalFileName  String
+  mimeType          String
+  sizeBytes         Int
+  storageKey        String
+  extractionStatus  ExtractionStatus  @default(PENDING)
+  unreadablePages   Int[]             @default([])
+  unreadableReason  String?
+  extractionError   String?
+  extractedAt       DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  extraction        DocumentExtraction?
+  fields            ExtractedField[]
+
+  @@unique([shipmentId, documentType])
+}
+
+model DocumentExtraction {
+  id             String   @id @default(cuid())
+  documentId     String   @unique
+  document       Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  schemaVersion  String
+  promptVersion  String
+  provider       String
+  model          String
+  rawJson        Json
+  validatedJson  Json
+  createdAt      DateTime @default(now())
+}
+
+model ExtractedField {
+  id                 String           @id @default(cuid())
+  shipmentId         String
+  shipment           Shipment         @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  documentId         String
+  document           Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  fieldKey           String
+  lineIndex          Int?
+  originalValueJson  Json?
+  originalRawText    String?
+  confidence         Decimal?         @db.Decimal(4, 3)
+  presence           FieldPresence
+  pageNumber         Int?
+  source             FieldSource
+  valueJson          Json?
+  reviewState        FieldReviewState @default(UNREVIEWED)
+  confirmedAt        DateTime?
+  confirmedById      String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  edits              FieldEdit[]
+
+  @@index([shipmentId, fieldKey])
+  @@index([documentId])
+}
+
+model FieldEdit {
+  id           String         @id @default(cuid())
+  fieldId      String
+  field        ExtractedField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  shipmentId   String
+  editType     EditType
+  previousJson Json?
+  newJson      Json?
+  note         String?
+  editedById   String
+  editedAt     DateTime       @default(now())
+
+  @@index([fieldId])
+  @@index([shipmentId])
+}
+
+model ValidationIssue {
+  id         String           @id @default(cuid())
+  shipmentId String
+  shipment   Shipment         @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  code       String
+  result     ValidationResult
+  state      IssueState
+  message    String
+  evidence   Json
+  createdAt  DateTime         @default(now())
+
+  @@index([shipmentId, state])
+}
+
+model Approval {
+  id               String         @id @default(cuid())
+  shipmentId       String         @unique
+  shipment         Shipment       @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  status           ApprovalStatus
+  contentRevision  Int
+  comment          String?
+  decidedById      String?
+  decidedAt        DateTime?
+}
+
+model ExportRecord {
+  id             String   @id @default(cuid())
+  shipmentId     String
+  shipment       Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  schemaVersion  String
+  rowCount       Int
+  exportedById   String
+  createdAt      DateTime @default(now())
+}
+
+model ActivityEvent {
+  id         String       @id @default(cuid())
+  shipmentId String
+  shipment   Shipment     @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  actorId    String?
+  type       ActivityType
+  payload    Json?
+  createdAt  DateTime     @default(now())
+
+  @@index([shipmentId, createdAt])
+}
+
+enum ProcessingStatus {
+  AWAITING_DOCUMENTS
+  READY
+  PROCESSING
+  FAILED
+  MANUAL_ENTRY_REQUIRED
+  COMPLETE
+}
+
+enum ReviewStatus {
+  NOT_READY
+  IN_REVIEW
+  PENDING_APPROVAL
+  APPROVED
+}
+
+enum DocumentType {
+  COMMERCIAL_INVOICE
+  PACKING_LIST
+  BILL_OF_LADING
+}
+
+enum ExtractionStatus {
+  PENDING
+  PROCESSING
+  EXTRACTED
+  FAILED
+  UNREADABLE
+  PARTIAL
+  MANUALLY_COMPLETED
+}
+
+enum FieldPresence {
+  PRESENT
+  MISSING
+  UNREADABLE
+}
+
+enum FieldSource {
+  AI
+  MANUAL
+}
+
+enum FieldReviewState {
+  UNREVIEWED
+  CONFIRMED
+  EDITED
+}
+
+enum EditType {
+  CONFIRMATION
+  CORRECTION
+  MANUAL_ENTRY
+}
+
+enum ValidationResult {
+  PASS
+  WARNING
+  MISMATCH
+  NEEDS_REVIEW
+}
+
+enum IssueState {
+  OPEN
+  RESOLVED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REVOKED
+}
+
+enum ActivityType {
+  CREATED
+  DOCUMENT_UPLOADED
+  EXTRACTION_STARTED
+  EXTRACTION_COMPLETED
+  EXTRACTION_FAILED
+  EXTRACTION_UNREADABLE
+  FIELD_EDITED
+  FIELD_CONFIRMED
+  MANUAL_ENTRY
+  VALIDATION_RERUN
+  SUBMITTED
+  APPROVED
+  APPROVAL_REVOKED
+  EXPORTED
+}
