@@ -18,8 +18,11 @@ export function DocumentViewer({
   const [loading, setLoading] = useState(false);
   const url = document ? `/api/shipments/${shipmentId}/documents/${document.id}/file` : "";
 
+  const documentId = document?.id ?? "";
+  const mimeType = document?.mimeType ?? "";
+
   useEffect(() => {
-    if (!document || document.mimeType !== "application/pdf") return;
+    if (!documentId || mimeType !== "application/pdf") return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     let cancelled = false;
@@ -55,7 +58,7 @@ export function DocumentViewer({
     return () => {
       cancelled = true;
     };
-  }, [document, page, url]);
+  }, [documentId, mimeType, page, url]);
 
   if (!document) {
     return (
