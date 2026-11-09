@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { fieldMeta } from "@/domain/fields";
 import { getAccuracy } from "@/server/accuracy/metrics";
 import { getOptionalSession } from "@/server/authz";
+import { Card } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -20,8 +21,8 @@ export default async function AccuracyPage() {
   if (user.role !== "DOCUMENTATION_MANAGER") {
     return (
       <div className="mx-auto max-w-lg px-6 py-10">
-        <h1 className="font-serif text-3xl">Accuracy</h1>
-        <p className="mt-3 text-sm text-muted">Only a documentation manager can view extraction accuracy.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Accuracy</h1>
+        <p className="mt-3 text-sm text-muted-foreground">Only a documentation manager can view extraction accuracy.</p>
       </div>
     );
   }
@@ -29,18 +30,19 @@ export default async function AccuracyPage() {
   return (
     <div className="mx-auto max-w-[1100px] space-y-8 px-6 py-8">
       <div>
-        <h1 className="font-serif text-3xl">Accuracy</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted">
-          A field counts only after a person confirms or corrects an AI value that was present. Missing, unreadable, and manually entered fields stay out of the figure. Unchanged confirmations count as correct.
+        <h1 className="text-2xl font-semibold tracking-tight">Accuracy</h1>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          A field counts only after a person confirms or corrects an AI value that was present. Missing, unreadable, and
+          manually entered fields stay out of the figure. Unchanged confirmations count as correct.
         </p>
       </div>
-      <section className="rounded-lg border border-line bg-paper p-5">
-        <h2 className="text-sm font-medium">Overall</h2>
-        <p className="mt-2 font-serif text-4xl">{percent(accuracy.overall.accuracy)}</p>
-        <p className="mt-1 text-sm text-muted">
+      <Card className="p-5">
+        <h2 className="text-sm font-medium text-muted-foreground">Overall</h2>
+        <p className="mt-2 text-4xl font-semibold tabular-nums tracking-tight">{percent(accuracy.overall.accuracy)}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
           {accuracy.overall.correct} correct of {accuracy.overall.total} reviewed fields
         </p>
-      </section>
+      </Card>
       <AccuracyTable
         title="By field"
         empty="No reviewed fields yet."
@@ -68,11 +70,11 @@ function AccuracyTable({
     <section>
       <h2 className="mb-3 text-sm font-medium">{title}</h2>
       {rows.length === 0 ? (
-        <p className="text-sm text-muted">{empty}</p>
+        <p className="text-sm text-muted-foreground">{empty}</p>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-line bg-paper">
+        <Card className="overflow-hidden">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-line text-muted">
+            <thead className="border-b border-border text-xs text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Correct</th>
@@ -82,16 +84,16 @@ function AccuracyTable({
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.label} className="border-b border-line last:border-0">
+                <tr key={row.label} className="border-b border-border last:border-0">
                   <td className="px-4 py-3">{row.label}</td>
-                  <td className="px-4 py-3">{row.correct}</td>
-                  <td className="px-4 py-3">{row.total}</td>
-                  <td className="px-4 py-3">{percent(row.accuracy)}</td>
+                  <td className="px-4 py-3 tabular-nums">{row.correct}</td>
+                  <td className="px-4 py-3 tabular-nums">{row.total}</td>
+                  <td className="px-4 py-3 tabular-nums">{percent(row.accuracy)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
     </section>
   );
