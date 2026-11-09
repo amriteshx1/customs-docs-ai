@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/app/login/login-form";
 import { getOptionalSession } from "@/server/authz";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -8,11 +9,22 @@ export default async function LoginPage() {
   const session = await getOptionalSession();
   if (session) redirect("/");
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
-      <p className="font-serif text-3xl">Customs desk</p>
-      <h1 className="mt-6 text-lg">Sign in to review shipment documents.</h1>
-      <LoginForm />
-      <p className="mt-6 text-sm text-muted">Accounts are issued for the documentation team. Public registration is closed.</p>
+    <main className="flex min-h-screen items-center justify-center px-6 py-16">
+      <div className="w-full max-w-sm">
+        <p className="mb-6 text-center text-sm font-semibold tracking-tight">Customs Desk</p>
+        <Card>
+          <CardHeader>
+            <CardTitle>Sign in</CardTitle>
+            <CardDescription>Review shipment documents with a team account.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LoginForm />
+            <p className="mt-4 text-xs text-muted-foreground">
+              Accounts are issued for the documentation team. Public registration is closed.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </main>
   );
 }
