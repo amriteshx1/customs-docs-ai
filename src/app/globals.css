@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #ffffff;
+  --desk: #e7edf3;
+  --ink: #172033;
+  --muted: #5d6d82;
+  --line: #d3dce6;
+  --accent: #1d4e89;
+  --accent-strong: #163d6b;
+  --warn: #8a5a00;
+  --warn-bg: #fbf4e4;
+  --bad: #8d2e2e;
+  --bad-bg: #f8ecec;
+  --ok: #1d6a45;
+  --ok-bg: #e7f3ec;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-desk: var(--desk);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-bad: var(--bad);
+  --color-bad-bg: var(--bad-bg);
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --font-sans: var(--font-plex-sans), sans-serif;
+  --font-serif: var(--font-plex-serif), serif;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--font-plex-sans), sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
